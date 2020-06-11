@@ -29,10 +29,11 @@
                 var ctx = gameCanvas.getContext("2d");
                 var baseSpeed = 10;
                 var score = 0;
-                var speedX = 0;
-                var speedY = 10;
+                var speedX = 10;
+                var speedY = 0;
                 var head = {x: 0, y:0};
                 var food;
+                var grid;
                 var goingRight = false;
                 var goingLeft = false;
                 var goingUp = false;
@@ -44,15 +45,49 @@
                     {x: 130, y: 150},
                     {x: 120, y: 150},
                     {x: 110, y: 150}]
+
                 function drawSnake(){
-                    ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-                    drawFood();
                     snake.forEach(function(snakePart){
                         ctx.beginPath();
+                        ctx.rect(snakePart.x, snakePart.y, 10, 10);
+                        ctx.lineWidth = "0.5";
+                        ctx.strokeStyle = "black";
                         ctx.fillStyle="green"
-                        ctx.fillRect(snakePart.x, snakePart.y, 10, 10);
+                        ctx.fill();
                         ctx.stroke();
                         
+                    })
+                }
+                function drawGame(){
+                    ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+                    drawFood();
+                    drawGrid(10);
+                    drawSnake();
+                }
+                function initGrid(squareSize){
+                    grid = Array(gameCanvas.width/squareSize);
+                    
+                    for(let i = 0;i<grid.length;i++){
+
+                        var tmp = Array(gameCanvas.height/squareSize);
+                        for(let k = 0;k<tmp.length;k++){
+                            tmp[k] = {x: k*squareSize, y: i*squareSize}
+
+                        }
+
+                        grid[i] = tmp;
+                    }       
+                }
+                function drawGrid(squareSize){
+                    grid.forEach(function(item){
+                        item.forEach(function(tmp){
+                            
+                            ctx.beginPath();
+                            ctx.rect(tmp.x,tmp.y,squareSize,squareSize);
+                            ctx.strokeStyle = "darkgrey"
+                            ctx.lineWidth = "0.5"
+                            ctx.stroke();
+                        })
                     })
                 }
                 function drawFood(){
@@ -83,8 +118,10 @@
                 function shift(){
                     head = {x: snake[0].x + speedX , y: snake[0].y + speedY};
                     snake.forEach(function (snakePart){
-                        if(head.x == snakePart.x && snakePart.y == head.y ) alive = false;
-                        console.log("snake died")
+                        if(head.x == snakePart.x && snakePart.y == head.y ){
+                            alive = false;
+                            console.log("snake died");
+                        } 
                     })
                     snake.unshift(head);
                     
@@ -93,9 +130,6 @@
                         score += 10;
                         spawnFood();
                     }else{
-                        console.log("head: " +head.x + ": " + head.y);
-                        console.log("food: "+ food.x + ": " + food.y);
-                        
                         snake.pop();
                     }
                     
@@ -115,17 +149,18 @@
                 function update(){
 
                     setTimeout(function(){
-                        
                         if(food == null){
                             spawnFood();
                         }
+
+                        //drawGrid(10);
                         checkAlive();
                         shift();
-                        drawSnake();
+                        drawGame();
                         updateScore();
                         
                         if(alive){update();}
-                    },100)
+                    },75)
                 }
                 
                 document.addEventListener('keydown', (e) => {
@@ -136,7 +171,7 @@
 
                 });
 
-                
+                initGrid(10);
                 update();
 
             </script>
